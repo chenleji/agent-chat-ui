@@ -15,7 +15,7 @@ import {
 import { useQueryState } from "nuqs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LangGraphLogoSVG } from "@/components/icons/langgraph";
+import { Logo } from "@/components/icons/logo";
 import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -141,14 +141,13 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
         <div className="animate-in fade-in-0 zoom-in-95 flex flex-col border bg-background shadow-lg rounded-lg max-w-3xl">
           <div className="flex flex-col gap-2 mt-14 p-6 border-b">
             <div className="flex items-start flex-col gap-2">
-              <LangGraphLogoSVG className="h-7" />
+              <Logo className="h-7" />
               <h1 className="text-xl font-semibold tracking-tight">
-                Agent Chat
+              慧择保险
               </h1>
             </div>
             <p className="text-muted-foreground">
-              Welcome to Agent Chat! Before you get started, you need to enter
-              the URL of the deployment and the assistant / graph ID.
+              欢迎光临慧择保险智能体! 在开始之前, 请先输入服务端部署的URL，智能助手/图的ID.
             </p>
           </div>
           <form
@@ -174,8 +173,7 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
                 Deployment URL<span className="text-rose-500">*</span>
               </Label>
               <p className="text-muted-foreground text-sm">
-                This is the URL of your LangGraph deployment. Can be a local, or
-                production deployment.
+              这是您的LangGraph服务端部署的URL，可以是本地部署或生产环境部署。
               </p>
               <Input
                 id="apiUrl"
@@ -191,9 +189,7 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
                 Assistant / Graph ID<span className="text-rose-500">*</span>
               </Label>
               <p className="text-muted-foreground text-sm">
-                This is the ID of the graph (can be the graph name), or
-                assistant to fetch threads from, and invoke when actions are
-                taken.
+              这是图的 ID（可以是图的名称），或用于获取会话、执行操作时调用的智能助手。
               </p>
               <Input
                 id="assistantId"
@@ -207,10 +203,7 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
             <div className="flex flex-col gap-2">
               <Label htmlFor="apiKey">LangSmith API Key</Label>
               <p className="text-muted-foreground text-sm">
-                This is <strong>NOT</strong> required if using a local LangGraph
-                server. This value is stored in your browser's local storage and
-                is only used to authenticate requests sent to your LangGraph
-                server.
+              如果使用本地部署的LangGraph服务端，则<strong>不需要</strong>填写此项。该值存储在您浏览器的本地缓存中，仅用于对发送到您的LangGraph服务端的请求进行身份验证。
               </p>
               <PasswordInput
                 id="apiKey"
@@ -223,7 +216,7 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
 
             <div className="flex justify-end mt-2">
               <Button type="submit" size="lg">
-                Continue
+                继续
                 <ArrowRight className="size-5" />
               </Button>
             </div>

@@ -12,7 +12,7 @@ import {
   DO_NOT_RENDER_ID_PREFIX,
   ensureToolCallsHaveResponses,
 } from "@/lib/ensure-tool-responses";
-import { LangGraphLogoSVG } from "../icons/langgraph";
+import { Logo } from "../icons/logo";
 import { TooltipIconButton } from "./tooltip-icon-button";
 import {
   ArrowDown,
@@ -263,9 +263,9 @@ export function Thread() {
                   damping: 30,
                 }}
               >
-                <LangGraphLogoSVG width={32} height={32} />
+                <Logo width={32} height={32} />
                 <span className="text-xl font-semibold tracking-tight">
-                  Agent Chat
+                  慧择保险
                 </span>
               </motion.button>
             </div>
@@ -273,7 +273,7 @@ export function Thread() {
             <TooltipIconButton
               size="lg"
               className="p-4"
-              tooltip="New thread"
+              tooltip="新会话"
               variant="ghost"
               onClick={() => setThreadId(null)}
             >
@@ -321,9 +321,9 @@ export function Thread() {
               <div className="sticky flex flex-col items-center gap-8 bottom-0 px-4 bg-white">
                 {!chatStarted && (
                   <div className="flex gap-3 items-center">
-                    <LangGraphLogoSVG className="flex-shrink-0 h-8" />
+                    <Logo className="flex-shrink-0 h-8" />
                     <h1 className="text-2xl font-semibold tracking-tight">
-                      Agent Chat
+                     慧择保险
                     </h1>
                   </div>
                 )}
@@ -346,7 +346,7 @@ export function Thread() {
                           form?.requestSubmit();
                         }
                       }}
-                      placeholder="Type your message..."
+                      placeholder="输入消息..."
                       className="p-3.5 pb-0 border-none bg-transparent field-sizing-content shadow-none ring-0 outline-none focus:outline-none focus:ring-0 resize-none"
                     />
 
@@ -362,7 +362,7 @@ export function Thread() {
                             htmlFor="render-tool-calls"
                             className="text-sm text-gray-600"
                           >
-                            Hide Tool Calls
+                            隐藏工具调用
                           </Label>
                         </div>
                       </div>
@@ -377,7 +377,7 @@ export function Thread() {
                           className="transition-all shadow-md"
                           disabled={isLoading || !input.trim()}
                         >
-                          Send
+                          发送
                         </Button>
                       )}
                     </div>
