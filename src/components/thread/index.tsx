@@ -84,6 +84,7 @@ export function Thread() {
   const stream = useStreamContext();
   const messages = stream.messages;
   const isLoading = stream.isLoading;
+  const userId = stream.userId;
 
   const lastError = useRef<string | undefined>(undefined);
 
@@ -131,7 +132,7 @@ export function Thread() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !userId) return;
     setFirstTokenReceived(false);
 
     const newHumanMessage: Message = {
@@ -141,6 +142,13 @@ export function Thread() {
     };
 
     const toolMessages = ensureToolCallsHaveResponses(stream.messages);
+
+    const config = {
+      configurable: {
+        user_id: userId,
+      },
+    };
+
     stream.submit(
       { messages: [...toolMessages, newHumanMessage] },
       {
@@ -153,6 +161,7 @@ export function Thread() {
             newHumanMessage,
           ],
         }),
+        config,
       },
     );
 
@@ -162,12 +171,21 @@ export function Thread() {
   const handleRegenerate = (
     parentCheckpoint: Checkpoint | null | undefined,
   ) => {
-    // Do this so the loading state is correct
+    if (!userId) return;
+
     prevMessageLength.current = prevMessageLength.current - 1;
     setFirstTokenReceived(false);
+
+    const config = {
+      configurable: {
+        user_id: userId,
+      },
+    };
+
     stream.submit(undefined, {
       checkpoint: parentCheckpoint,
       streamMode: ["values"],
+      config,
     });
   };
 

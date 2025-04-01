@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 import { getApiKey } from "@/lib/api-key";
+import { getUserId, setUserId as saveUserId } from "@/lib/user-id";
 import { useThreads } from "./Thread";
 import { toast } from "sonner";
 
@@ -36,7 +37,9 @@ const useTypedStream = useStream<
   }
 >;
 
-type StreamContextType = ReturnType<typeof useTypedStream>;
+type StreamContextType = ReturnType<typeof useTypedStream> & {
+  userId: string | null;
+};
 const StreamContext = createContext<StreamContextType | undefined>(undefined);
 
 async function sleep(ms = 4000) {
@@ -68,11 +71,13 @@ const StreamSession = ({
   apiKey,
   apiUrl,
   assistantId,
+  userId,
 }: {
   children: ReactNode;
   apiKey: string | null;
   apiUrl: string;
   assistantId: string;
+  userId: string | null;
 }) => {
   const [threadId, setThreadId] = useQueryState("threadId");
   const { getThreads, setThreads } = useThreads();
@@ -113,8 +118,13 @@ const StreamSession = ({
     });
   }, [apiKey, apiUrl]);
 
+  const contextValue = {
+    ...streamValue,
+    userId,
+  };
+
   return (
-    <StreamContext.Provider value={streamValue}>
+    <StreamContext.Provider value={contextValue}>
       {children}
     </StreamContext.Provider>
   );
@@ -127,10 +137,18 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   const [apiKey, _setApiKey] = useState(() => {
     return getApiKey();
   });
+  const [userId, _setUserId] = useState(() => {
+    return getUserId();
+  });
 
   const setApiKey = (key: string) => {
     window.localStorage.setItem("lg:chat:apiKey", key);
     _setApiKey(key);
+  };
+
+  const setUserId = (id: string) => {
+    saveUserId(id);
+    _setUserId(id);
   };
 
   const [assistantId, setAssistantId] = useQueryState("assistantId");
@@ -159,10 +177,12 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
               const apiUrl = formData.get("apiUrl") as string;
               const assistantId = formData.get("assistantId") as string;
               const apiKey = formData.get("apiKey") as string;
+              const userIdValue = formData.get("userId") as string;
 
               setApiUrl(apiUrl);
               setApiKey(apiKey);
               setAssistantId(assistantId);
+              setUserId(userIdValue);
 
               form.reset();
             }}
@@ -214,6 +234,20 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
               />
             </div>
 
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="userId">User ID</Label>
+              <p className="text-muted-foreground text-sm">
+                请输入您的用户ID（例如：手机号/唯一标识字符）。
+              </p>
+              <Input
+                id="userId"
+                name="userId"
+                className="bg-background"
+                defaultValue={userId ?? ""}
+                placeholder="例如：user-123"
+              />
+            </div>
+
             <div className="flex justify-end mt-2">
               <Button type="submit" size="lg">
                 继续
@@ -227,7 +261,7 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   return (
-    <StreamSession apiKey={apiKey} apiUrl={apiUrl} assistantId={assistantId}>
+    <StreamSession apiKey={apiKey} apiUrl={apiUrl} assistantId={assistantId} userId={userId}>
       {children}
     </StreamSession>
   );
