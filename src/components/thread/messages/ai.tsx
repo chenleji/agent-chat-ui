@@ -102,6 +102,20 @@ export function AssistantMessage({
   const hasAnthropicToolCalls = !!anthropicStreamedToolCalls?.length;
   const isToolResult = message.type === "tool";
 
+  console.log("--------------------------------Interrupt检测详情:", {
+    interrupt: thread.interrupt,
+    interrupt_value: thread.interrupt?.value,
+    interrupt_value_type: thread.interrupt?.value ? typeof thread.interrupt.value : 'undefined',
+    isArray: thread.interrupt?.value ? Array.isArray(thread.interrupt.value) : false,
+    isValidSchema: interrupt?.value ? isAgentInboxInterruptSchema(interrupt.value) : false,
+    isLastMessage,
+    messageId: message.id,
+    lastMessageId: thread.messages[thread.messages.length - 1].id,
+    renderCondition: isAgentInboxInterruptSchema(interrupt?.value) && isLastMessage,
+    messageType: message.type,
+    messageContent: contentString.substring(0, 50) + (contentString.length > 50 ? '...' : '')
+  });
+
   if (isToolResult && hideToolCalls) {
     return null;
   }
@@ -131,14 +145,23 @@ export function AssistantMessage({
           )}
 
           <CustomComponent message={message} thread={thread} />
-          {isAgentInboxInterruptSchema(interrupt?.value) && isLastMessage && (
-            <ThreadView interrupt={interrupt.value} />
-          )}
-          {interrupt?.value &&
-          !isAgentInboxInterruptSchema(interrupt.value) &&
-          isLastMessage ? (
-            <GenericInterruptView interrupt={interrupt.value} />
-          ) : null}
+          {(() => {
+            if (isAgentInboxInterruptSchema(interrupt?.value) && isLastMessage) {
+              console.log("渲染ThreadView组件", { 
+                interrupt: interrupt.value,
+                interrupt_type: typeof interrupt.value,
+                isArray: Array.isArray(interrupt.value)
+              });
+              return <ThreadView interrupt={interrupt.value} />;
+            }
+            
+            if (interrupt?.value && !isAgentInboxInterruptSchema(interrupt.value) && isLastMessage) {
+              console.log("渲染GenericInterruptView组件", { interrupt: interrupt.value });
+              return <GenericInterruptView interrupt={interrupt.value} />;
+            }
+            
+            return null;
+          })()}
           <div
             className={cn(
               "flex gap-2 items-center mr-auto transition-opacity",

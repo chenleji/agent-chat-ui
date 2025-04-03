@@ -82,6 +82,7 @@ export default function useInterruptedActions({
 
   const resumeRun = (response: HumanResponse[]): boolean => {
     try {
+      console.log("resumeRun - 发送HumanResponse:", JSON.stringify(response, null, 2));
       thread.submit(
         {},
         {
@@ -90,9 +91,10 @@ export default function useInterruptedActions({
           },
         },
       );
+      console.log("resumeRun - HumanResponse发送成功");
       return true;
     } catch (e: any) {
-      console.error("Error sending human response", e);
+      console.error("resumeRun - 发送HumanResponse失败:", e);
       return false;
     }
   };
@@ -101,7 +103,10 @@ export default function useInterruptedActions({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent,
   ) => {
     e.preventDefault();
+    console.log("handleSubmit - 开始处理", { humanResponse });
+    
     if (!humanResponse) {
+      console.log("handleSubmit - 没有响应内容");
       toast.error("Error", {
         description: "Please enter a response.",
         duration: 5000,
@@ -124,11 +129,13 @@ export default function useInterruptedActions({
           (r) => {
             if (r.type === "edit") {
               if (r.acceptAllowed && !r.editsMade) {
+                console.log("handleSubmit - 转换edit为accept响应", { args: r.args });
                 return {
                   type: "accept",
                   args: r.args,
                 };
               } else {
+                console.log("handleSubmit - 处理edit响应", { args: r.args, editsMade: r.editsMade });
                 return {
                   type: "edit",
                   args: r.args,
@@ -138,8 +145,10 @@ export default function useInterruptedActions({
 
             if (r.type === "response" && !r.args) {
               // If response was allowed but no response was given, do not include in the response
+              console.log("handleSubmit - 跳过空response");
               return [];
             }
+            console.log(`handleSubmit - 处理${r.type}响应`, { args: r.args });
             return {
               type: r.type,
               args: r.args,
@@ -151,6 +160,7 @@ export default function useInterruptedActions({
           (r) => r.type === selectedSubmitType,
         );
         if (!input) {
+          console.log("handleSubmit - 找不到匹配的响应类型", { selectedSubmitType });
           toast.error("Error", {
             description: "No response found.",
             richColors: true,
@@ -160,15 +170,18 @@ export default function useInterruptedActions({
           return;
         }
 
+        console.log("handleSubmit - 提交HumanResponse", { input, selectedSubmitType });
         setLoading(true);
         setStreaming(true);
         const resumedSuccessfully = resumeRun([input]);
         if (!resumedSuccessfully) {
           // This will only be undefined if the graph ID is not found
           // in this case, the method will trigger a toast for us.
+          console.log("handleSubmit - 提交HumanResponse失败");
           return;
         }
 
+        console.log("handleSubmit - 提交HumanResponse成功");
         toast("Success", {
           description: "Response submitted successfully.",
           duration: 5000,
@@ -178,7 +191,7 @@ export default function useInterruptedActions({
           setStreamFinished(true);
         }
       } catch (e: any) {
-        console.error("Error sending human response", e);
+        console.error("handleSubmit - 处理HumanResponse出错:", e);
 
         if ("message" in e && e.message.includes("Invalid assistant ID")) {
           toast("Error: Invalid assistant ID", {
