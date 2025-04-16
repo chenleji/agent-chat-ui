@@ -20,6 +20,7 @@ import {
   PanelRightOpen,
   PanelRightClose,
   SquarePen,
+  LogOut
 } from "lucide-react";
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
@@ -29,6 +30,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { GitHubSVG } from "../icons/github";
+import { useAuth } from "@/providers/auth-provider";
 import {
   Tooltip,
   TooltipContent,
@@ -72,7 +74,7 @@ function ScrollToBottom(props: { className?: string }) {
       onClick={() => scrollToBottom()}
     >
       <ArrowDown className="h-4 w-4" />
-      <span>Scroll to bottom</span>
+      <span>滚动到底部</span>
     </Button>
   );
 }
@@ -114,6 +116,7 @@ export function Thread() {
   const [input, setInput] = useState("");
   const [firstTokenReceived, setFirstTokenReceived] = useState(false);
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+  const { logout } = useAuth();
 
   const stream = useStreamContext();
   const messages = stream.messages;
@@ -149,7 +152,27 @@ export function Thread() {
     }
   }, [stream.error]);
 
-  // TODO: this should be part of the useStream hook
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/user/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      
+      if (response.ok) {
+        logout();
+        toast.success("退出成功");
+      } else {
+        toast.error("退出失败，请重试");
+      }
+    } catch (error) {
+      console.error("退出时出错:", error);
+      toast.error("网络错误，请重试");
+    }
+  };
+
   const prevMessageLength = useRef(0);
   useEffect(() => {
     if (
@@ -196,7 +219,6 @@ export function Thread() {
   const handleRegenerate = (
     parentCheckpoint: Checkpoint | null | undefined,
   ) => {
-    // Do this so the loading state is correct
     prevMessageLength.current = prevMessageLength.current - 1;
     setFirstTokenReceived(false);
     stream.submit(undefined, {
@@ -273,8 +295,24 @@ export function Thread() {
                 </Button>
               )}
             </div>
-            <div className="absolute top-2 right-4 flex items-center">
+            <div className="absolute top-2 right-4 flex items-center gap-4">
               <OpenGitHubRepo />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>退出登录</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         )}
@@ -308,7 +346,6 @@ export function Thread() {
                   damping: 30,
                 }}
               >
-                {/* <Logo width={32} height={32} /> */}
                 <img src="/insure-logo.png" alt="InsureX Logo" width={32} height={32} />
                 <span className="text-xl font-semibold tracking-tight">
                 InsureX
@@ -317,13 +354,29 @@ export function Thread() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center">
+              <div className="flex items-center gap-4">
                 <OpenGitHubRepo />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="h-5 w-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>退出登录</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <TooltipIconButton
                 size="lg"
                 className="p-4"
-                tooltip="New thread"
+                tooltip="新建对话"
                 variant="ghost"
                 onClick={() => setThreadId(null)}
               >
@@ -363,8 +416,6 @@ export function Thread() {
                       />
                     ),
                   )}
-                {/* Special rendering case where there are no AI/tool messages, but there is an interrupt.
-                    We need to render it outside of the messages list, since there are no messages to render */}
                 {hasNoAIOrToolMessages && !!stream.interrupt && (
                   <AssistantMessage
                     key="interrupt-msg"
@@ -382,7 +433,6 @@ export function Thread() {
               <div className="sticky flex flex-col items-center gap-8 bottom-0 px-4 bg-white">
                 {!chatStarted && (
                   <div className="flex gap-3 items-center">
-                    {/* <Logo className="flex-shrink-0 h-8" /> */}
                     <img src="/insure-logo.png" alt="InsureX Logo" className="flex-shrink-0 h-8" />
                     <h1 className="text-2xl font-semibold tracking-tight">
                     InsureX
