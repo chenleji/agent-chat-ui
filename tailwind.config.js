@@ -58,6 +58,8 @@ module.exports = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
+        "wechat-green": "var(--wechat-green)",
+        "light-blue": "var(--light-blue)",
       },
     },
   },
