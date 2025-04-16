@@ -283,7 +283,7 @@ export function Thread() {
               >
                 <Logo width={32} height={32} />
                 <span className="text-xl font-semibold tracking-tight">
-                  慧择保险
+                InsureX
                 </span>
               </motion.button>
             </div>
@@ -341,7 +341,7 @@ export function Thread() {
                   <div className="flex gap-3 items-center">
                     <Logo className="flex-shrink-0 h-8" />
                     <h1 className="text-2xl font-semibold tracking-tight">
-                     慧择保险
+                    InsureX
                     </h1>
                   </div>
                 )}
@@ -387,7 +387,7 @@ export function Thread() {
                       {stream.isLoading ? (
                         <Button key="stop" onClick={() => stream.stop()}>
                           <LoaderCircle className="w-4 h-4 animate-spin" />
-                          Cancel
+                          取消
                         </Button>
                       ) : (
                         <Button

@@ -9,8 +9,8 @@ export function Logo({
 }) {
   return (
     <img
-      src="https://picx.zhimg.com/v2-62fcd0952553090c6addd538e8c4a2fe_xll.jpg?source=32738c0c&needBackground=1"
-      alt="Logo"
+      src="/insurex-logo.png"
+      alt="INSUREX Logo"
       width={width}
       height={height}
       className={className}

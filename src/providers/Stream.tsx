@@ -161,11 +161,11 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
             <div className="flex items-start flex-col gap-2">
               <Logo className="h-7" />
               <h1 className="text-xl font-semibold tracking-tight">
-              慧择保险
+              InsureX
               </h1>
             </div>
             <p className="text-muted-foreground">
-              欢迎光临慧择保险智能体! 在开始之前, 请先输入服务端部署的URL，智能助手/图的ID.
+              欢迎光临InsureX! 在开始之前, 请先输入服务端部署的URL，智能助手/图的ID.
             </p>
           </div>
           <form
