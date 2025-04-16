@@ -82,7 +82,7 @@ function OpenGitHubRepo() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <a
+          {/* <a
             href="https://github.com/langchain-ai/agent-chat-ui"
             target="_blank"
             className="flex items-center justify-center"
@@ -91,10 +91,10 @@ function OpenGitHubRepo() {
               width="24"
               height="24"
             />
-          </a>
+          </a> */}
         </TooltipTrigger>
         <TooltipContent side="left">
-          <p>Open GitHub repo</p>
+          {/* <p>Open GitHub repo</p> */}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -308,12 +308,10 @@ export function Thread() {
                   damping: 30,
                 }}
               >
-                <LangGraphLogoSVG
-                  width={32}
-                  height={32}
-                />
+                {/* <Logo width={32} height={32} /> */}
+                <img src="/insure-logo.png" alt="InsureX Logo" width={32} height={32} />
                 <span className="text-xl font-semibold tracking-tight">
-                  Agent Chat
+                InsureX
                 </span>
               </motion.button>
             </div>
@@ -381,12 +379,13 @@ export function Thread() {
               </>
             }
             footer={
-              <div className="sticky bottom-0 flex flex-col items-center gap-8 bg-white">
+              <div className="sticky flex flex-col items-center gap-8 bottom-0 px-4 bg-white">
                 {!chatStarted && (
-                  <div className="flex items-center gap-3">
-                    <LangGraphLogoSVG className="h-8 flex-shrink-0" />
+                  <div className="flex gap-3 items-center">
+                    {/* <Logo className="flex-shrink-0 h-8" /> */}
+                    <img src="/insure-logo.png" alt="InsureX Logo" className="flex-shrink-0 h-8" />
                     <h1 className="text-2xl font-semibold tracking-tight">
-                      Agent Chat
+                    InsureX
                     </h1>
                   </div>
                 )}
@@ -414,7 +413,7 @@ export function Thread() {
                           form?.requestSubmit();
                         }
                       }}
-                      placeholder="Type your message..."
+                      placeholder="请输入..."
                       className="field-sizing-content resize-none border-none bg-transparent p-3.5 pb-0 shadow-none ring-0 outline-none focus:ring-0 focus:outline-none"
                     />
 
@@ -430,7 +429,7 @@ export function Thread() {
                             htmlFor="render-tool-calls"
                             className="text-sm text-gray-600"
                           >
-                            Hide Tool Calls
+                            隐藏工具调用
                           </Label>
                         </div>
                       </div>
@@ -440,7 +439,7 @@ export function Thread() {
                           onClick={() => stream.stop()}
                         >
                           <LoaderCircle className="h-4 w-4 animate-spin" />
-                          Cancel
+                          取消
                         </Button>
                       ) : (
                         <Button
@@ -448,7 +447,7 @@ export function Thread() {
                           className="shadow-md transition-all"
                           disabled={isLoading || !input.trim()}
                         >
-                          Send
+                          发送
                         </Button>
                       )}
                     </div>
