@@ -103,11 +103,11 @@ export default function LoginPage() {
         // 使用AuthContext中的login方法，并传递手机号
         login(phoneNumber);
         
-        // 延迟跳转，确保toast提示显示
+        // 使用短延迟，确保状态更新后再跳转
         setTimeout(() => {
-          // 跳转到首页并打开聊天历史
-          router.push("/?chatHistoryOpen=true");
-        }, 1000);
+          // 使用window.location.href强制跳转，确保页面完全刷新
+          window.location.href = "/chat";
+        }, 500);
       } else {
         const errorMsg = data.detail || data.message || "登录失败，请检查手机号和验证码";
         setErrorMessage(errorMsg);
@@ -123,14 +123,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      {/* 系统Logo和名称 */}
+      <div className="mb-10 flex flex-col items-center">
+        <img src="/insure-logo.png" alt="InsureX Logo" className="h-16 w-16 mb-4" />
+        <h1 className="text-3xl font-bold text-gray-900">InsureX</h1>
+        <p className="mt-2 text-center text-gray-600">
+          智能保险顾问系统
+        </p>
+      </div>
+      
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">用户登录</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
+          <div className="space-y-6">
+            <div className="space-y-3">
               <Label htmlFor="phone">手机号码</Label>
               <Input
                 id="phone"
@@ -141,7 +150,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="code">验证码</Label>
               <div className="flex space-x-2">
                 <Input
@@ -169,7 +178,7 @@ export default function LoginPage() {
             )}
 
             <Button
-              className="w-full"
+              className="w-full mt-8"
               onClick={handleLogin}
               disabled={
                 !isPhoneNumberValid ||

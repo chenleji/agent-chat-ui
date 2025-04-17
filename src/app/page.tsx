@@ -1,20 +1,26 @@
 "use client";
 
-import { Thread } from "@/components/thread";
-import { StreamProvider } from "@/providers/Stream";
-import { ThreadProvider } from "@/providers/Thread";
-import { Toaster } from "@/components/ui/sonner";
-import React from "react";
+import { useAuth } from "@/providers/auth-provider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function DemoPage(): React.ReactNode {
+export default function HomePage() {
+  const { isLoggedIn } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // 根据登录状态重定向
+    if (isLoggedIn) {
+      router.push("/chat");
+    } else {
+      router.push("/login");
+    }
+  }, [isLoggedIn, router]);
+
+  // 显示加载状态，等待重定向
   return (
-    <React.Suspense fallback={<div>Loading (layout)...</div>}>
-      <Toaster />
-      <ThreadProvider>
-        <StreamProvider>
-          <Thread />
-        </StreamProvider>
-      </ThreadProvider>
-    </React.Suspense>
+    <div className="flex min-h-screen items-center justify-center">
+      <p className="text-lg">正在跳转，请稍候...</p>
+    </div>
   );
 }

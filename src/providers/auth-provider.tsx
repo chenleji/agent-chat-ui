@@ -37,13 +37,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const isPublicPath = publicPaths.some(path => 
         pathname === path || pathname.startsWith(`${path}/`)
       );
+      
+      // 首页单独处理，通过首页的useEffect重定向
+      const isHomePage = pathname === "/";
 
-      // 如果用户未登录且当前路径不是公共路径，则重定向到登录页面
-      if (!isLoggedIn && !isPublicPath) {
+      // 如果用户未登录且当前路径不是公共路径且不是首页，则重定向到登录页面
+      if (!isLoggedIn && !isPublicPath && !isHomePage) {
         router.push("/login");
       } else if (isPublicPath && isLoggedIn) {
-        // 已登录用户访问登录页时，重定向到首页并打开聊天历史
-        router.push("/?chatHistoryOpen=true");
+        // 已登录用户访问登录页时，重定向到聊天页面
+        router.push("/chat");
       }
     }
   }, [isLoggedIn, isLoading, pathname, router]);
