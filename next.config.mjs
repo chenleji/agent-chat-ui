@@ -8,12 +8,12 @@ const nextConfig = {
             {
                 // 所有图片管理相关服务
                 source: '/image/:path*',
-                destination: 'http://localhost:8000/:path*',
+                destination: 'http://localhost:8000/image/:path*',
             },
             {
                 // 所有文件管理相关服务
                 source: '/file/:path*',
-                destination: 'http://localhost:8000/:path*', 
+                destination: 'http://localhost:8000/file/:path*', 
             },
             {
                 // 所有用户管理相关服务
