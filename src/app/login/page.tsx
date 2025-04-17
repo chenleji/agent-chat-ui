@@ -100,8 +100,8 @@ export default function LoginPage() {
         // 显示成功提示
         toast.success("登录成功，正在跳转...");
         
-        // 使用AuthContext中的login方法
-        login();
+        // 使用AuthContext中的login方法，并传递手机号
+        login(phoneNumber);
         
         // 延迟跳转，确保toast提示显示
         setTimeout(() => {

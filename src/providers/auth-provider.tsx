@@ -5,7 +5,8 @@ import { useRouter, usePathname } from "next/navigation";
 
 interface AuthContextType {
   isLoggedIn: boolean;
-  login: () => void;
+  userId: string | null;
+  login: (userId: string) => void;
   logout: () => void;
 }
 
@@ -13,15 +14,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
-  // 初始化时检查登录状态
+  // 初始化时检查登录状态和用户ID
   useEffect(() => {
-    // 从localStorage中获取登录状态
     const loginState = localStorage.getItem("isLoggedIn");
+    const storedUserId = localStorage.getItem("userId");
     setIsLoggedIn(loginState === "true");
+    setUserId(storedUserId);
     setIsLoading(false);
   }, []);
 
@@ -45,21 +48,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isLoggedIn, isLoading, pathname, router]);
 
-  // 登录方法
-  const login = () => {
+  // 登录方法 - 接收并存储 userId
+  const login = (userIdentifier: string) => {
     localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userId", userIdentifier);
     setIsLoggedIn(true);
+    setUserId(userIdentifier);
   };
 
-  // 登出方法
+  // 登出方法 - 移除 userId
   const logout = () => {
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userId");
     setIsLoggedIn(false);
+    setUserId(null);
     router.push("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userId, login, logout }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );
