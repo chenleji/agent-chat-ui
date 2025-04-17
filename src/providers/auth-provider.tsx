@@ -58,11 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 登出方法 - 移除 userId
   const logout = () => {
+    // 先清除所有本地存储的身份信息
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userId");
+    
+    // 更新状态
     setIsLoggedIn(false);
     setUserId(null);
-    router.push("/login");
+    
+    // 强制跳转到登录页，完全刷新页面
+    window.location.href = "/login";
   };
 
   return (

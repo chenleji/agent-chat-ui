@@ -154,22 +154,31 @@ export function Thread() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/user/api/logout", {
+      // 先清除本地状态
+      logout();
+      
+      // 显示退出成功提示
+      toast.success("退出成功，正在跳转...");
+      
+      // 直接使用router强制跳转
+      window.location.href = "/login";
+      
+      // 后台异步请求，不阻塞跳转
+      fetch("/user/api/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         }
+      }).catch(error => {
+        console.error("退出时出错:", error);
+        // 已经跳转，不需要显示错误提示
       });
-      
-      if (response.ok) {
-        logout();
-        toast.success("退出成功");
-      } else {
-        toast.error("退出失败，请重试");
-      }
     } catch (error) {
       console.error("退出时出错:", error);
-      toast.error("网络错误，请重试");
+      toast.error("退出失败，请重试");
+      
+      // 如果出错，仍然尝试跳转
+      window.location.href = "/login";
     }
   };
 
