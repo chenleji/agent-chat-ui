@@ -283,6 +283,15 @@ export function Thread() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-4">
                 <OpenGitHubRepo />
+                <TooltipIconButton
+                  size="lg"
+                  className="p-4"
+                  tooltip="新建对话"
+                  variant="ghost"
+                  onClick={() => setThreadId(null)}
+                >
+                  <SquarePen className="size-5" />
+                </TooltipIconButton>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -300,15 +309,6 @@ export function Thread() {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <TooltipIconButton
-                size="lg"
-                className="p-4"
-                tooltip="新建对话"
-                variant="ghost"
-                onClick={() => setThreadId(null)}
-              >
-                <SquarePen className="size-5" />
-              </TooltipIconButton>
             </div>
 
             <div className="from-background to-background/0 absolute inset-x-0 top-full h-5 bg-gradient-to-b" />
