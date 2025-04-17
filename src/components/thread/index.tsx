@@ -17,14 +17,11 @@ import { TooltipIconButton } from "./tooltip-icon-button";
 import {
   ArrowDown,
   LoaderCircle,
-  PanelRightOpen,
-  PanelRightClose,
   SquarePen,
   LogOut
 } from "lucide-react";
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
-import ThreadHistory from "./history";
 import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Label } from "../ui/label";
@@ -105,10 +102,6 @@ function OpenGitHubRepo() {
 
 export function Thread() {
   const [threadId, setThreadId] = useQueryState("threadId");
-  const [chatHistoryOpen, setChatHistoryOpen] = useQueryState(
-    "chatHistoryOpen",
-    parseAsBoolean.withDefault(false),
-  );
   const [hideToolCalls, setHideToolCalls] = useQueryState(
     "hideToolCalls",
     parseAsBoolean.withDefault(false),
@@ -243,67 +236,15 @@ export function Thread() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
-      <div className="relative hidden lg:flex">
-        <motion.div
-          className="absolute z-20 h-full overflow-hidden border-r bg-white"
-          style={{ width: 300 }}
-          animate={
-            isLargeScreen
-              ? { x: chatHistoryOpen ? 0 : -300 }
-              : { x: chatHistoryOpen ? 0 : -300 }
-          }
-          initial={{ x: -300 }}
-          transition={
-            isLargeScreen
-              ? { type: "spring", stiffness: 300, damping: 30 }
-              : { duration: 0 }
-          }
-        >
-          <div
-            className="relative h-full"
-            style={{ width: 300 }}
-          >
-            <ThreadHistory />
-          </div>
-        </motion.div>
-      </div>
-      <motion.div
+      <div
         className={cn(
           "relative flex min-w-0 flex-1 flex-col overflow-hidden",
           !chatStarted && "grid-rows-[1fr]",
         )}
-        layout={isLargeScreen}
-        animate={{
-          marginLeft: chatHistoryOpen ? (isLargeScreen ? 300 : 0) : 0,
-          width: chatHistoryOpen
-            ? isLargeScreen
-              ? "calc(100% - 300px)"
-              : "100%"
-            : "100%",
-        }}
-        transition={
-          isLargeScreen
-            ? { type: "spring", stiffness: 300, damping: 30 }
-            : { duration: 0 }
-        }
       >
         {!chatStarted && (
           <div className="absolute top-0 left-0 z-10 flex w-full items-center justify-between gap-3 p-2 pl-4">
-            <div>
-              {(!chatHistoryOpen || !isLargeScreen) && (
-                <Button
-                  className="hover:bg-gray-100"
-                  variant="ghost"
-                  onClick={() => setChatHistoryOpen((p) => !p)}
-                >
-                  {chatHistoryOpen ? (
-                    <PanelRightOpen className="size-5" />
-                  ) : (
-                    <PanelRightClose className="size-5" />
-                  )}
-                </Button>
-              )}
-            </div>
+            <div className="w-48"></div>
             <div className="absolute top-2 right-4 flex items-center gap-4">
               <OpenGitHubRepo />
               <TooltipProvider>
@@ -328,32 +269,9 @@ export function Thread() {
         {chatStarted && (
           <div className="relative z-10 flex items-center justify-between gap-3 p-2">
             <div className="relative flex items-center justify-start gap-2">
-              <div className="absolute left-0 z-10">
-                {(!chatHistoryOpen || !isLargeScreen) && (
-                  <Button
-                    className="hover:bg-gray-100"
-                    variant="ghost"
-                    onClick={() => setChatHistoryOpen((p) => !p)}
-                  >
-                    {chatHistoryOpen ? (
-                      <PanelRightOpen className="size-5" />
-                    ) : (
-                      <PanelRightClose className="size-5" />
-                    )}
-                  </Button>
-                )}
-              </div>
               <motion.button
                 className="flex cursor-pointer items-center gap-2"
                 onClick={() => setThreadId(null)}
-                animate={{
-                  marginLeft: !chatHistoryOpen ? 48 : 0,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30,
-                }}
               >
                 <img src="/insure-logo.png" alt="InsureX Logo" width={32} height={32} />
                 <span className="text-xl font-semibold tracking-tight">
@@ -516,7 +434,7 @@ export function Thread() {
             }
           />
         </StickToBottom>
-      </motion.div>
+      </div>
     </div>
   );
 }
