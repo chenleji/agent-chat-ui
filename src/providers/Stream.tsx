@@ -22,8 +22,18 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { getApiKey } from "@/lib/api-key";
 import { useThreads } from "./Thread";
 import { toast } from "sonner";
+import { useAuth } from "./auth-provider";
 
 export type StateType = { messages: Message[]; ui?: UIMessage[] };
+
+// 为submit方法中使用的options定义类型
+interface SubmitOptions {
+  streamMode?: string[];
+  optimisticValues?: (prev: any) => any;
+  checkpoint?: any;
+  command?: any;
+  configurable?: Record<string, any>;
+}
 
 const useTypedStream = useStream<
   StateType,
@@ -47,21 +57,7 @@ async function checkGraphStatus(
   apiUrl: string,
   apiKey: string | null,
 ): Promise<boolean> {
-  console.log(`[DEBUG] 尝试访问 ${apiUrl}/info 检查图状态`);
-  console.log(`[DEBUG] API Key 是否存在: ${apiKey ? "是" : "否"}`);
-  
   try {
-    // 创建请求头对象用于调试
-    const headers = apiKey ? { "X-Api-Key": apiKey } : {};
-    console.log(`[DEBUG] 请求头信息:`, headers);
-    
-    // 记录完整的请求URL
-    console.log(`[DEBUG] 完整请求URL: ${apiUrl}/info`);
-    
-    // 执行请求并记录请求开始时间
-    const startTime = Date.now();
-    console.log(`[DEBUG] 开始请求时间: ${new Date(startTime).toISOString()}`);
-    
     const res = await fetch(`${apiUrl}/info`, {
       ...(apiKey && {
         headers: {
@@ -70,41 +66,9 @@ async function checkGraphStatus(
       }),
     });
     
-    // 记录请求完成时间和耗时
-    const endTime = Date.now();
-    console.log(`[DEBUG] 结束请求时间: ${new Date(endTime).toISOString()}`);
-    console.log(`[DEBUG] 请求耗时: ${endTime - startTime}ms`);
-    
-    // 记录响应状态
-    console.log(`[DEBUG] 响应状态码: ${res.status}`);
-    console.log(`[DEBUG] 响应 OK: ${res.ok}`);
-    
-    // 尝试获取响应内容
-    try {
-      const responseText = await res.text();
-      console.log(`[DEBUG] 响应内容: ${responseText.substring(0, 500)}${responseText.length > 500 ? '...' : ''}`);
-    } catch (textError) {
-      console.log(`[DEBUG] 无法读取响应内容: ${textError}`);
-    }
-    
     return res.ok;
-  } catch (e) {
-    // 详细记录错误信息
-    console.error(`[ERROR] 访问 ${apiUrl}/info 失败`);
-    console.error(`[ERROR] 错误类型: ${e.constructor.name}`);
-    console.error(`[ERROR] 错误消息: ${e.message}`);
-    console.error(`[ERROR] 错误堆栈: ${e.stack}`);
-    
-    // 检查是否是网络错误
-    if (e instanceof TypeError && e.message.includes('network')) {
-      console.error(`[ERROR] 这可能是一个网络连接问题，请检查服务器是否正在运行并绑定到正确的接口`);
-    }
-    
-    // 检查是否是CORS错误
-    if (e instanceof DOMException && e.name === 'NetworkError') {
-      console.error(`[ERROR] 这可能是一个CORS问题，请检查服务器是否允许来自当前源的请求`);
-    }
-    
+  } catch (error: any) {
+    console.error(`[ERROR] 访问 ${apiUrl}/info 失败: ${error.message}`);
     return false;
   }
 }
@@ -122,11 +86,28 @@ const StreamSession = ({
 }) => {
   const [threadId, setThreadId] = useQueryState("threadId");
   const { getThreads, setThreads } = useThreads();
+  const { userId } = useAuth();
+  
+  // 构建请求头，包含用户ID
+  const headers: Record<string, string> = {};
+  if (apiKey) {
+    headers["X-Api-Key"] = apiKey;
+  }
+  // 添加包含用户ID的自定义头
+  if (userId) {
+    headers["X-User-ID"] = userId;
+  }
+  
+  console.log("创建Stream会话，用户ID:", userId);
+  console.log("请求头:", headers);
+  
   const streamValue = useTypedStream({
     apiUrl,
     apiKey: apiKey ?? undefined,
     assistantId,
     threadId: threadId ?? null,
+    // 添加自定义请求头，包含用户ID
+    defaultHeaders: headers,
     onCustomEvent: (event, options) => {
       options.mutate((prev) => {
         const ui = uiMessageReducer(prev.ui ?? [], event);
@@ -248,8 +229,12 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
                 id="apiUrl"
                 name="apiUrl"
                 className="bg-background"
-                defaultValue={apiUrl || DEFAULT_API_URL}
-                required
+                placeholder="http://localhost:2024"
+                defaultValue={
+                  finalApiUrl
+                    ? finalApiUrl
+                    : DEFAULT_API_URL
+                }
               />
             </div>
 
@@ -266,8 +251,12 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
                 id="assistantId"
                 name="assistantId"
                 className="bg-background"
-                defaultValue={assistantId || DEFAULT_ASSISTANT_ID}
-                required
+                placeholder="agent"
+                defaultValue={
+                  finalAssistantId
+                    ? finalAssistantId
+                    : DEFAULT_ASSISTANT_ID
+                }
               />
             </div>
 
@@ -306,21 +295,51 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <StreamSession
       apiKey={apiKey}
-      apiUrl={apiUrl}
-      assistantId={assistantId}
+      apiUrl={finalApiUrl}
+      assistantId={finalAssistantId}
     >
       {children}
     </StreamSession>
   );
 };
 
-// Create a custom hook to use the context
+// 获取Stream上下文的钩子函数
 export const useStreamContext = (): StreamContextType => {
   const context = useContext(StreamContext);
+  const { userId } = useAuth();
+  
   if (context === undefined) {
     throw new Error("useStreamContext must be used within a StreamProvider");
   }
-  return context;
+  
+  // 重新包装submit方法，确保在每个请求中添加userId
+  const wrappedContext: StreamContextType = {
+    ...context,
+    submit: (payload, options) => {
+      // 创建新的options对象，如果不存在则初始化
+      const enhancedOptions = options ? { ...options } : {};
+      
+      // 确保config和configurable字段存在
+      if (!enhancedOptions.config) {
+        enhancedOptions.config = {};
+      }
+      
+      if (!enhancedOptions.config.configurable) {
+        enhancedOptions.config.configurable = {};
+      }
+      
+      // 在config.configurable中添加user_id
+      enhancedOptions.config.configurable.user_id = userId || '';
+      
+      console.log('发送请求到LangGraph，用户ID:', userId);
+      console.log('请求配置:', enhancedOptions);
+      
+      // 使用增强的options调用原始submit
+      return context.submit(payload, enhancedOptions);
+    }
+  };
+  
+  return wrappedContext;
 };
 
 export default StreamContext;
