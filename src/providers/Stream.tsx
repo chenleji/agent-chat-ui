@@ -86,15 +86,21 @@ const StreamSession = ({
 }) => {
   const [threadId, setThreadId] = useQueryState("threadId");
   const { getThreads, setThreads } = useThreads();
-  const { userId } = useAuth();
+  const { userId, getAuthHeaders } = useAuth();
   
-  // 构建请求头，包含用户ID
-  const headers: Record<string, string> = {};
+  // 构建请求头，包含用户ID和认证信息
+  const authHeaders = getAuthHeaders();
+  const headers: Record<string, string> = {
+    ...authHeaders
+  };
+  
+  // 添加API密钥（如果有）
   if (apiKey) {
     headers["X-Api-Key"] = apiKey;
   }
-  // 添加包含用户ID的自定义头
-  if (userId) {
+  
+  // 确保包含用户ID
+  if (userId && !headers["X-User-ID"]) {
     headers["X-User-ID"] = userId;
   }
   
@@ -106,7 +112,7 @@ const StreamSession = ({
     apiKey: apiKey ?? undefined,
     assistantId,
     threadId: threadId ?? null,
-    // 添加自定义请求头，包含用户ID
+    // 使用增强的请求头
     defaultHeaders: headers,
     onCustomEvent: (event, options) => {
       options.mutate((prev) => {

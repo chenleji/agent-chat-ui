@@ -12,6 +12,7 @@ import {
   SetStateAction,
 } from "react";
 import { createClient } from "./client";
+import { useAuth } from "./auth-provider";
 
 interface ThreadContextType {
   getThreads: () => Promise<Thread[]>;
@@ -38,20 +39,38 @@ export function ThreadProvider({ children }: { children: ReactNode }) {
   const [assistantId] = useQueryState("assistantId");
   const [threads, setThreads] = useState<Thread[]>([]);
   const [threadsLoading, setThreadsLoading] = useState(false);
+  const { getAuthHeaders } = useAuth();
 
   const getThreads = useCallback(async (): Promise<Thread[]> => {
     if (!apiUrl || !assistantId) return [];
-    const client = createClient(apiUrl, getApiKey() ?? undefined);
+    
+    // 获取认证头
+    const headers = getAuthHeaders();
+    const apiKey = getApiKey() ?? undefined;
+    
+    // 添加API密钥到请求头
+    if (apiKey) {
+      headers["X-Api-Key"] = apiKey;
+    }
+    
+    try {
+      const response = await fetch(`${apiUrl}/threads`, {
+        headers,
+        method: "GET"
+      });
 
-    const threads = await client.threads.search({
-      metadata: {
-        ...getThreadSearchMetadata(assistantId),
-      },
-      limit: 100,
-    });
+      if (!response.ok) {
+        console.error("Error fetching threads:", response.statusText);
+        return [];
+      }
 
-    return threads;
-  }, [apiUrl, assistantId]);
+      const data = await response.json();
+      return data.threads || [];
+    } catch (error) {
+      console.error("Error fetching threads:", error);
+      return [];
+    }
+  }, [apiUrl, assistantId, getAuthHeaders]);
 
   const value = {
     getThreads,
@@ -67,9 +86,33 @@ export function ThreadProvider({ children }: { children: ReactNode }) {
 }
 
 export function useThreads() {
-  const context = useContext(ThreadContext);
-  if (context === undefined) {
-    throw new Error("useThreads must be used within a ThreadProvider");
-  }
-  return context;
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [threadsLoading, setThreadsLoading] = useState(false);
+  const { getAuthHeaders } = useAuth();
+
+  const getThreads = useCallback(async (): Promise<Thread[]> => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2024";
+    
+    // 获取认证头
+    const headers = getAuthHeaders();
+    
+    try {
+      const response = await fetch(`${apiUrl}/threads`, {
+        headers
+      });
+
+      if (!response.ok) {
+        console.error("Error fetching threads:", response.statusText);
+        return [];
+      }
+
+      const data = await response.json();
+      return data.threads || [];
+    } catch (error) {
+      console.error("Error fetching threads:", error);
+      return [];
+    }
+  }, [getAuthHeaders]);
+
+  return { threads, setThreads, getThreads, threadsLoading, setThreadsLoading };
 }

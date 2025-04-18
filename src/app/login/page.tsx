@@ -97,11 +97,14 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        // 解析返回的数据
+        const { access_token, token_type } = data;
+        
         // 显示成功提示
         toast.success("登录成功，正在跳转...");
         
-        // 使用AuthContext中的login方法，并传递手机号
-        login(phoneNumber);
+        // 使用AuthContext中的login方法，传递手机号和token
+        login(phoneNumber, access_token);
         
         // 使用短延迟，确保状态更新后再跳转
         setTimeout(() => {
