@@ -24,16 +24,62 @@ function ContentCopyable({
 
   const handleCopy = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    
+    // 检查navigator和clipboard API是否可用
+    try {
+      if (navigator && navigator.clipboard) {
+        navigator.clipboard.writeText(content)
+          .then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          })
+          .catch(err => {
+            console.error('无法使用Clipboard API复制:', err);
+            fallbackCopy();
+          });
+      } else {
+        fallbackCopy();
+      }
+    } catch (error) {
+      console.error('复制过程中出错:', error);
+      fallbackCopy();
+    }
+  };
+
+  // 后备复制方法
+  const fallbackCopy = () => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = content;
+      // 防止滚动到底部
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        console.error('后备复制方法失败');
+      }
+    } catch (err) {
+      console.error('后备复制方法出错:', err);
+    }
   };
 
   return (
     <TooltipIconButton
       onClick={(e) => handleCopy(e)}
       variant="ghost"
-      tooltip="Copy content"
+      tooltip="复制"
       disabled={disabled}
     >
       <AnimatePresence
@@ -168,7 +214,7 @@ export function CommandBar({
       <div className="flex items-center gap-2">
         <TooltipIconButton
           disabled={isLoading}
-          tooltip="Cancel edit"
+          tooltip="取消"
           variant="ghost"
           onClick={() => {
             setIsEditing(false);
@@ -178,7 +224,7 @@ export function CommandBar({
         </TooltipIconButton>
         <TooltipIconButton
           disabled={isLoading}
-          tooltip="Submit"
+          tooltip="提交"
           variant="secondary"
           onClick={handleSubmitEdit}
         >
@@ -197,7 +243,7 @@ export function CommandBar({
       {isAiMessage && !!handleRegenerate && (
         <TooltipIconButton
           disabled={isLoading}
-          tooltip="Refresh"
+          tooltip="刷新"
           variant="ghost"
           onClick={handleRegenerate}
         >
@@ -207,7 +253,7 @@ export function CommandBar({
       {showEdit && (
         <TooltipIconButton
           disabled={isLoading}
-          tooltip="Edit"
+          tooltip="编辑"
           variant="ghost"
           onClick={() => {
             setIsEditing?.(true);

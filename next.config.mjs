@@ -38,12 +38,25 @@ const nextConfig = {
         return [
             {
                 // 其他需要认证的API
-                source: '/(image|file|user|api)/:path*',
+                source: '/(image|file|user)/:path*',
                 headers: [
                     { key: 'Access-Control-Allow-Origin', value: '*' },
                     { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
                     { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Api-Key, Authorization' },
                     { key: 'Access-Control-Allow-Credentials', value: 'true' },
+                ],
+            },
+            {
+                // 针对LangGraph API的流式数据支持
+                source: '/api/:path*',
+                headers: [
+                    { key: 'Access-Control-Allow-Origin', value: '*' },
+                    { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+                    { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Api-Key, Authorization' },
+                    { key: 'Access-Control-Allow-Credentials', value: 'true' },
+                    // 添加流式数据所需的关键头信息
+                    { key: 'X-Accel-Buffering', value: 'no' },
+                    { key: 'Cache-Control', value: 'no-cache' },
                 ],
             },
         ];
