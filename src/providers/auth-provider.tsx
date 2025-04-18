@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { setCookie, getCookie, deleteCookie } from "@/lib/cookies";
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -22,8 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 初始化时检查登录状态和用户ID
   useEffect(() => {
-    const loginState = localStorage.getItem("isLoggedIn");
-    const storedUserId = localStorage.getItem("userId");
+    const loginState = getCookie("isLoggedIn");
+    const storedUserId = getCookie("userId");
     const storedToken = getStoredToken();
     
     setIsLoggedIn(loginState === "true");
@@ -54,35 +55,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isLoggedIn, isLoading, pathname, router]);
 
-  // 从localStorage获取token的函数
+  // 从cookie获取token的函数
   const getStoredToken = (): string | null => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('auth_token');
-    }
-    return null;
+    return getCookie('auth_token');
   };
 
   // 更新login函数定义和实现
   const login = (userId: string, token?: string) => {
     // 设置登录状态
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userId", userId);
+    setCookie("isLoggedIn", "true");
+    setCookie("userId", userId);
     setIsLoggedIn(true);
     setUserId(userId);
     
     // 存储token（如果提供）
     if (token) {
-      localStorage.setItem('auth_token', token);
-      console.log('Token已存储到localStorage');
+      setCookie('auth_token', token);
+      console.log('Token已存储到cookie');
     }
   };
 
   // 更新logout函数，清除所有凭据
   const logout = () => {
-    // 清除所有本地存储的身份信息
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userId");
-    localStorage.removeItem('auth_token');
+    // 清除所有cookie存储的身份信息
+    deleteCookie("isLoggedIn");
+    deleteCookie("userId");
+    deleteCookie('auth_token');
     
     // 更新状态
     setIsLoggedIn(false);

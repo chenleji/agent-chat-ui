@@ -23,6 +23,7 @@ import { getApiKey } from "@/lib/api-key";
 import { useThreads } from "./Thread";
 import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
+import { setCookie } from "@/lib/cookies";
 
 export type StateType = { messages: Message[]; ui?: UIMessage[] };
 
@@ -180,7 +181,7 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   });
 
   const setApiKey = (key: string) => {
-    window.localStorage.setItem("lg:chat:apiKey", key);
+    setCookie("lg:chat:apiKey", key);
     _setApiKey(key);
   };
 
