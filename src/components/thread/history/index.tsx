@@ -113,11 +113,11 @@ export default function ThreadHistory() {
             历史会话
           </h1>
         </div>
-        {threadsLoading ? (
+        {/* {threadsLoading ? (
           <ThreadHistoryLoading />
         ) : (
           <ThreadList threads={threads} />
-        )}
+        )} */}
       </div>
       <div className="lg:hidden">
         <Sheet
