@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     devIndicators: false,
-    allowedDevOrigins: ['localhost', '192.168.100.5', '*.192.168.100.5'],
+    // allowedDevOrigins: ['localhost', '192.168.100.5', '*.192.168.100.5'],
+    
+    // 设置代理超时时间，避免长连接被过早关闭
+    experimental: {
+        proxyTimeout: 3600000, // 1小时超时，对于流式响应非常重要
+    },
 
     // 配置API和服务路由转发
     async rewrites() {
@@ -22,11 +27,6 @@ const nextConfig = {
                     // 所有用户管理相关服务
                     source: '/user/:path*',
                     destination: 'http://localhost:8000/:path*', 
-                },
-                {
-                    // 所有LangGraph会话
-                    source: '/api/:path*',
-                    destination: 'http://localhost:2024/:path*',
                 }
             ],
             // 可选：fallback路由配置（如果需要的话）
@@ -45,20 +45,7 @@ const nextConfig = {
                     { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Api-Key, Authorization' },
                     { key: 'Access-Control-Allow-Credentials', value: 'true' },
                 ],
-            },
-            {
-                // 针对LangGraph API的流式数据支持
-                source: '/api/:path*',
-                headers: [
-                    { key: 'Access-Control-Allow-Origin', value: '*' },
-                    { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
-                    { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Api-Key, Authorization' },
-                    { key: 'Access-Control-Allow-Credentials', value: 'true' },
-                    // 添加流式数据所需的关键头信息
-                    { key: 'X-Accel-Buffering', value: 'no' },
-                    { key: 'Cache-Control', value: 'no-cache' },
-                ],
-            },
+            }
         ];
     },
 };
