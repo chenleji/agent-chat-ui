@@ -105,9 +105,6 @@ const StreamSession = ({
     headers["X-User-ID"] = userId;
   }
   
-  console.log("创建Stream会话，用户ID:", userId);
-  console.log("请求头:", headers);
-  
   const streamValue = useTypedStream({
     apiUrl,
     apiKey: apiKey ?? undefined,
@@ -337,9 +334,6 @@ export const useStreamContext = (): StreamContextType => {
       
       // 在config.configurable中添加user_id
       enhancedOptions.config.configurable.user_id = userId || '';
-      
-      console.log('发送请求到LangGraph，用户ID:', userId);
-      console.log('请求配置:', enhancedOptions);
       
       // 使用增强的options调用原始submit
       return context.submit(payload, enhancedOptions);

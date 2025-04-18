@@ -56,7 +56,7 @@ export function ThreadProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch(`${apiUrl}/threads`, {
         headers,
-        method: "GET"
+        method: "POST"
       });
 
       if (!response.ok) {
@@ -98,7 +98,8 @@ export function useThreads() {
     
     try {
       const response = await fetch(`${apiUrl}/threads`, {
-        headers
+        headers,
+        method: "POST"
       });
 
       if (!response.ok) {
