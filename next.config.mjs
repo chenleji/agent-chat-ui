@@ -3,34 +3,40 @@ const nextConfig = {
     devIndicators: false,
     allowedDevOrigins: ['192.168.100.5', '*.192.168.100.5'],
 
+    // 配置API和服务路由转发
     async rewrites() {
-        return [
-            {
-                // 所有图片管理相关服务
-                source: '/image/:path*',
-                destination: 'http://localhost:8000/image/:path*',
-            },
-            {
-                // 所有文件管理相关服务
-                source: '/file/:path*',
-                destination: 'http://localhost:8000/file/:path*', 
-            },
-            {
-                // 所有用户管理相关服务
-                source: '/user/:path*',
-                destination: 'http://localhost:8000/:path*', 
-            },
-            {
-                // 添加对/info的代理
-                source: '/info',
-                destination: 'http://localhost:2024/info', // 指向本地LangGraph服务
-            },
-            {
-                // 为其他LangGraph API路径添加通用代理
-                source: '/api/:path*',
-                destination: 'http://localhost:2024/:path*', // 指向本地LangGraph服务
-            },
-        ];
+        return {
+            // 路由转发配置，这些路由在浏览器中不可见
+            beforeFiles: [
+                {
+                    // 所有图片管理相关服务
+                    source: '/image/:path*',
+                    destination: 'http://localhost:8000/image/:path*',
+                },
+                {
+                    // 所有文件管理相关服务
+                    source: '/file/:path*',
+                    destination: 'http://localhost:8000/file/:path*', 
+                },
+                {
+                    // 所有用户管理相关服务
+                    source: '/user/:path*',
+                    destination: 'http://localhost:8000/:path*', 
+                },
+                {
+                    // 添加对/info的代理
+                    source: '/info',
+                    destination: 'http://localhost:2024/info', // 指向本地LangGraph服务
+                },
+                {
+                    // 为其他LangGraph API路径添加通用代理
+                    source: '/api/:path*',
+                    destination: 'http://localhost:2024/:path*', // 指向本地LangGraph服务
+                },
+            ],
+            // 可选：fallback路由配置（如果需要的话）
+            fallback: []
+        };
     },
 
     async headers() {
@@ -38,8 +44,10 @@ const nextConfig = {
             {
                 source: '/(info|api|image|file|user/:path*)',
                 headers: [
-                    // 其他头...
-                    { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Api-Key' },
+                    // CORS配置
+                    { key: 'Access-Control-Allow-Origin', value: '*' },
+                    { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+                    { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Api-Key, Authorization' },
                 ],
             },
         ];
