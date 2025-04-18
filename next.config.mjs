@@ -1,18 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     devIndicators: false,
-    allowedDevOrigins: ['192.168.100.5', '*.192.168.100.5'],
+    allowedDevOrigins: ['localhost', '192.168.100.5', '*.192.168.100.5'],
 
     // 配置API和服务路由转发
     async rewrites() {
         return {
             // 路由转发配置，这些路由在浏览器中不可见
             beforeFiles: [
-                {
-                    // 添加对/info的代理 - 不需要认证
-                    source: '/info',
-                    destination: 'http://localhost:2024/info', // 指向本地LangGraph服务
-                },
                 {
                     // 所有图片管理相关服务
                     source: '/image/:path*',
@@ -29,10 +24,10 @@ const nextConfig = {
                     destination: 'http://localhost:8000/:path*', 
                 },
                 {
-                    // 为其他LangGraph API路径添加通用代理
+                    // 所有LangGraph会话
                     source: '/api/:path*',
-                    destination: 'http://localhost:2024/:path*', // 指向本地LangGraph服务
-                },
+                    destination: 'http://localhost:2024/:path*',
+                }
             ],
             // 可选：fallback路由配置（如果需要的话）
             fallback: []
@@ -42,17 +37,8 @@ const nextConfig = {
     async headers() {
         return [
             {
-                // 放宽/info接口的CORS限制
-                source: '/info',
-                headers: [
-                    { key: 'Access-Control-Allow-Origin', value: '*' },
-                    { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS' },
-                    { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Api-Key' },
-                ],
-            },
-            {
                 // 其他需要认证的API
-                source: '/(api|image|file|user)/:path*',
+                source: '/(image|file|user|api)/:path*',
                 headers: [
                     { key: 'Access-Control-Allow-Origin', value: '*' },
                     { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
@@ -65,3 +51,4 @@ const nextConfig = {
 };
 
 export default nextConfig;
+

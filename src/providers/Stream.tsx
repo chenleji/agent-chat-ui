@@ -27,15 +27,6 @@ import { setCookie } from "@/lib/cookies";
 
 export type StateType = { messages: Message[]; ui?: UIMessage[] };
 
-// 为submit方法中使用的options定义类型
-interface SubmitOptions {
-  streamMode?: string[];
-  optimisticValues?: (prev: any) => any;
-  checkpoint?: any;
-  command?: any;
-  configurable?: Record<string, any>;
-}
-
 const useTypedStream = useStream<
   StateType,
   {
@@ -59,25 +50,17 @@ async function checkGraphStatus(
   apiKey: string | null,
 ): Promise<boolean> {
   try {
-    // 使用相对URL，通过Next.js代理访问
-    // 这样可以避免直接的CORS问题
-    const infoUrl = '/info';
-    console.log(`通过Next.js代理访问API: ${infoUrl}`);
-    
-    const headers: Record<string, string> = {};
-    if (apiKey) {
-      headers["X-Api-Key"] = apiKey;
-    }
-    
-    const res = await fetch(infoUrl, {
-      headers,
-      // 不发送凭据，/info接口不需要认证
-      credentials: 'omit',
+    const res = await fetch(`${apiUrl}/info`, {
+      ...(apiKey && {
+        headers: {
+          "X-Api-Key": apiKey,
+        },
+      }),
     });
-    
+
     return res.ok;
-  } catch (error: any) {
-    console.error(`[ERROR] 访问 /info 失败: ${error.message}`);
+  } catch (e) {
+    console.error(e);
     return false;
   }
 }
