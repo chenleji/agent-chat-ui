@@ -41,7 +41,14 @@ export function useAuthCheck() {
             logout(); // 使用AuthProvider中的logout函数
           }
         } else {
-          // 服务器响应错误，可能是网络问题或服务器错误
+          // 如果是401未授权错误，直接执行登出操作
+          if (response.status === 401) {
+            console.log('认证状态检查失败: 未授权(401)，执行自动登出');
+            logout();
+            return;
+          }
+          
+          // 其他服务器响应错误，可能是网络问题或服务器错误
           console.error('认证状态检查失败，HTTP错误:', response.status);
         }
       } catch (error) {
