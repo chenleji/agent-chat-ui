@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     devIndicators: false,
-    // allowedDevOrigins: ['localhost', '192.168.100.5', '*.192.168.100.5'],
     
     // 设置代理超时时间，避免长连接被过早关闭
     experimental: {
@@ -10,23 +9,24 @@ const nextConfig = {
 
     // 配置API和服务路由转发
     async rewrites() {
+        const AgentExtServiceUrl = process.env.AGENT_EXT_SERVICE_URL || 'http://localhost:8000';
         return {
             // 路由转发配置，这些路由在浏览器中不可见
             beforeFiles: [
                 {
                     // 所有图片管理相关服务
                     source: '/image/:path*',
-                    destination: 'http://localhost:8000/image/:path*',
+                    destination: `${AgentExtServiceUrl}/image/:path*`,
                 },
                 {
                     // 所有文件管理相关服务
                     source: '/file/:path*',
-                    destination: 'http://localhost:8000/file/:path*', 
+                    destination: `${AgentExtServiceUrl}/file/:path*`,
                 },
                 {
                     // 所有用户管理相关服务
                     source: '/user/:path*',
-                    destination: 'http://localhost:8000/:path*', 
+                    destination: `${AgentExtServiceUrl}/:path*`, 
                 }
             ],
             // 可选：fallback路由配置（如果需要的话）
