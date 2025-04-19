@@ -1,9 +1,10 @@
 import { parsePartialJson } from "@langchain/core/output_parsers";
 import { useStreamContext } from "@/providers/Stream";
 import { AIMessage, Checkpoint, Message } from "@langchain/langgraph-sdk";
-import { getContentString } from "../utils";
+import { getContentString, getReasoningContent } from "../utils";
 import { BranchSwitcher, CommandBar } from "./shared";
 import { MarkdownText } from "../markdown-text";
+import { ReasoningContent } from "../reasoning-content";
 import { LoadExternalComponent } from "@langchain/langgraph-sdk/react-ui";
 import { cn } from "@/lib/utils";
 import { ToolCalls, ToolResult } from "./tool-calls";
@@ -76,6 +77,7 @@ export function AssistantMessage({
 }) {
   const content = message?.content ?? [];
   const contentString = getContentString(content);
+  const reasoningContent = getReasoningContent(message);
   const [hideToolCalls] = useQueryState(
     "hideToolCalls",
     parseAsBoolean.withDefault(false),
@@ -118,6 +120,13 @@ export function AssistantMessage({
         <ToolResult message={message} />
       ) : (
         <div className="flex flex-col gap-2">
+          {reasoningContent && (
+            <ReasoningContent 
+              content={reasoningContent}
+              initiallyExpanded={true}
+            />
+          )}
+
           {contentString.length > 0 && (
             <div className="py-1">
               <MarkdownText>{contentString}</MarkdownText>
